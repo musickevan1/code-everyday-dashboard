@@ -1,30 +1,19 @@
 import { Repository, Language } from '../../types/github';
 import { octokit, handleGitHubError } from './api';
-import { getCachedData, setCachedData } from '../cache';
+import { setCachedData } from '../cache';
 
-export async function fetchRepositoryStats(owner: string, repo: string): Promise<Repository> {
-  const cacheKey = `repo_${owner}_${repo}`;
-  const cachedData = getCachedData<Repository>(cacheKey);
-  
-  if (cachedData) {
-    return cachedData;
-  }
-
+export async function fetchRepositoryStats(owner: string, repo: string, commitCount: number): Promise<Repository> {
   try {
-    const [repoData, languagesData] = await Promise.all([
-      octokit.rest.repos.get({ owner, repo }),
-      octokit.rest.repos.listLanguages({ owner, repo })
-    ]);
-
-    const languages = processLanguages(languagesData.data);
+    const { data: languagesData } = await octokit.rest.repos.listLanguages({ owner, repo });
+    const languages = processLanguages(languagesData);
     
     const stats: Repository = {
-      name: 'code-everyday-dashboard',
-      commitCount: 1, // Set to 1 for day 1
+      name: repo,
+      commitCount: commitCount,
       languages
     };
 
-    setCachedData(cacheKey, stats);
+    setCachedData(`repo_${owner}_${repo}`, stats);
     return stats;
   } catch (error: any) {
     handleGitHubError(error);

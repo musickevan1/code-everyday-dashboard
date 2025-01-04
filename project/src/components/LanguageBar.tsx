@@ -25,7 +25,7 @@ export function LanguageBar({ languages }: Props) {
   return (
     <div className="space-y-2">
       <div className="flex h-2 rounded-full overflow-hidden">
-        {languages.map((lang, index) => (
+        {languages.map((lang) => (
           <div
             key={lang.name}
             className={`${getLanguageColor(lang.name)}`}
@@ -33,12 +33,12 @@ export function LanguageBar({ languages }: Props) {
           />
         ))}
       </div>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2 text-xs">
         {languages.map((lang) => (
-          <div key={lang.name} className="flex items-center gap-1.5">
-            <span className={`w-3 h-3 rounded-full ${getLanguageColor(lang.name)}`} />
-            <span className="text-sm text-white">{lang.name}</span>
-            <span className="text-sm text-emerald-400">{lang.percentage}%</span>
+          <div key={lang.name} className="flex items-center gap-1">
+            <span className={`w-2 h-2 rounded-full ${getLanguageColor(lang.name)}`} />
+            <span className="text-white">{lang.name}</span>
+            <span className="text-emerald-400">{lang.percentage}%</span>
           </div>
         ))}
       </div>

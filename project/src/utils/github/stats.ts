@@ -1,10 +1,10 @@
 import { GitHubStats } from '../../types/github';
 import { octokit, handleGitHubError } from './api';
-import { processContributions } from './contributions';
+import { processContributions } from '../contributions/processor';
 import { getCachedData, setCachedData } from '../cache';
 
-export async function fetchGitHubStats(username: string): Promise<GitHubStats> {
-  const cacheKey = `user_${username}`;
+export async function fetchGitHubStats(username: string, currentDay: number = 1): Promise<GitHubStats> {
+  const cacheKey = `user_${username}_${currentDay}`;
   const cachedData = getCachedData<GitHubStats>(cacheKey);
   
   if (cachedData) {
@@ -17,7 +17,7 @@ export async function fetchGitHubStats(username: string): Promise<GitHubStats> {
       per_page: 30
     });
     
-    const contributions = processContributions(events);
+    const contributions = processContributions(events, currentDay);
     const stats: GitHubStats = {
       totalCommits: events.filter(event => event.type === 'PushEvent').length,
       currentStreak: calculateStreak(contributions),

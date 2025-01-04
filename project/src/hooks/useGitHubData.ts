@@ -8,14 +8,14 @@ export function useGitHubData() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchUserStats = async (username: string) => {
+  const fetchUserStats = async (username: string, currentDay: number = 1) => {
     if (!username) return;
     
     setLoading(true);
     setError(null);
     
     try {
-      const data = await fetchGitHubStats(username);
+      const data = await fetchGitHubStats(username, currentDay);
       setStats(data);
     } catch (error) {
       if (error instanceof Error) {
@@ -28,7 +28,7 @@ export function useGitHubData() {
     }
   };
 
-  const fetchRepoStats = async (username: string, repoInput: string) => {
+  const fetchRepoStats = async (username: string, repoInput: string, commitCount: number) => {
     if (!username || !repoInput || !stats) return;
     
     setLoading(true);
@@ -40,7 +40,7 @@ export function useGitHubData() {
         throw new Error('Invalid repository format. Please use owner/repo or full GitHub URL.');
       }
       
-      const repoStats = await fetchRepositoryStats(repoInfo.owner, repoInfo.repo);
+      const repoStats = await fetchRepositoryStats(repoInfo.owner, repoInfo.repo, commitCount);
       setStats({ ...stats, selectedRepo: repoStats });
     } catch (error) {
       if (error instanceof Error) {
@@ -53,11 +53,26 @@ export function useGitHubData() {
     }
   };
 
+  const updateContribution = (date: string, count: number) => {
+    if (!stats) return;
+
+    const updatedContributions = stats.contributions.map(day => 
+      day.date === date ? { ...day, count } : day
+    );
+
+    setStats({
+      ...stats,
+      contributions: updatedContributions,
+      totalCommits: updatedContributions.reduce((sum, day) => sum + day.count, 0)
+    });
+  };
+
   return {
     stats,
     error,
     loading,
     fetchUserStats,
-    fetchRepoStats
+    fetchRepoStats,
+    updateContribution
   };
 }
